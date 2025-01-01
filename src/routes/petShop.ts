@@ -28,7 +28,7 @@ const configurePetShopRoutes = (router: Router) => {
                 res.status(404).json({ message: "Petshop not found" });
                 return;
             }
-            
+
             res.status(200).json(petshop);
         } catch (error) {
             console.error(error);
@@ -75,7 +75,47 @@ const configurePetShopRoutes = (router: Router) => {
         }
     });
 
-    router.put('/petshops/:id', async (req: Request, res: Response) => {});
+    router.put('/petshops/:id', async (req: Request, res: Response) => {
+        const id = req.params.id;
+        const data = req.body;
+
+        if (!data.name) {
+            res.status(400).json({ message: "Missing required field: name" });
+            return;
+        }
+
+        if (data.cnpj) {
+            res.status(400).json({ message: "CNPJ cannot be changed" });
+            return;
+        }
+
+        try {
+            const petshop = await prisma.petShops.findFirst({
+                where: {
+                    id: id
+                }
+            });
+
+            if (!petshop) {
+                res.status(404).json({ message: "Petshop not found" });
+                return;
+            }
+
+            const updatePetshop = await prisma.petShops.update({
+                where: {
+                    id: id
+                },
+                data: {
+                    name: data.name
+                }
+            });
+
+            res.status(200).json( { message: "Updating successfully", petshop: updatePetshop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error updating petshop" });
+        }
+    });
 
     router.delete('/petshops/:id', async (req: Request, res: Response) => {});
 }
