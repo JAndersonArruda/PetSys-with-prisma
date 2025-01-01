@@ -14,7 +14,27 @@ const configurePetShopRoutes = (router: Router) => {
         }
     });
 
-    router.get('/petshops/:id', async (req: Request, res: Response) => {});
+    router.get('/petshops/:id', async (req: Request, res: Response) => {
+        const id = req.params.id;
+        
+        try {
+            const petshop = await prisma.petShops.findFirst({
+                where: {
+                    id: id
+                }
+            });
+            
+            if (!petshop) {
+                res.status(404).json({ message: "Petshop not found" });
+                return;
+            }
+            
+            res.status(200).json(petshop);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error retrieving petshop" });
+        }
+    });
 
     router.post('/petshops', async (req: Request, res: Response) => {
         const data = req.body;
