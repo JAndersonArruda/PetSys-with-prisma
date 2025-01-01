@@ -117,7 +117,33 @@ const configurePetShopRoutes = (router: Router) => {
         }
     });
 
-    router.delete('/petshops/:id', async (req: Request, res: Response) => {});
+    router.delete('/petshops/:id', async (req: Request, res: Response) => {
+        const id = req.params.id;
+
+        try {
+            const petshop = await prisma.petShops.findFirst({
+                where: {
+                    id: id
+                }
+            });
+
+            if (!petshop) {
+                res.status(404).json({ message: "Petshop not found" });
+                return;
+            };
+
+            const deletePetshop = await prisma.petShops.delete({
+                where: {
+                    id: id
+                }
+            });
+
+            res.status(200).json({ message: "Deleting successfully", petshop: deletePetshop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error deleting petshop" });            
+        }
+    });
 }
 
 export default configurePetShopRoutes;
