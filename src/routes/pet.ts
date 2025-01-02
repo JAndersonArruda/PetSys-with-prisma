@@ -79,7 +79,58 @@ const configurePetRoutes = (router: Router) => {
         }
     });
 
-    router.post('/pets', async (req: Request, res: Response) => {});
+    router.post('/pets', async (req: Request, res: Response) => {
+        const data = req.body;
+        const account = req.headers['cnpj'];
+
+        if (!account) {
+            res.status(401).json({ message: "Missing required header: cnpj" });
+            return;
+        }
+
+        const cnpj = Array.isArray(account)? account[0] : account;
+
+        if (!data.name || !data.type || !data.description || !data.deadline_vaccination) {
+            res.status(400).json({ message: "Missing required fields" });
+            return;
+        }
+
+        const deadline = new Date(data.deadline_vaccination);
+        if (isNaN(deadline.getTime())) {
+            res.status(400).json({ message: "Invalid deadline_vaccination date format" });
+            return;
+        }
+
+        try {
+            const userAccount = await prisma.petShops.findFirst({ 
+                where: {
+                    cnpj: cnpj
+                }
+            });
+
+            if (!userAccount) {
+                res.status(404).json({ message: "User not exists" });
+                return;
+            }
+
+            const newPet = await prisma.pets.create({
+                data: {
+                    name: data.name,
+                    type: data.type,
+                    description: data.description,
+                    vaccinated: false,
+                    deadline_vaccination: deadline,
+                    created_at: new Date(),
+                    cnpjPetshop: cnpj
+                }
+            });
+            
+            res.status(201).json(newPet);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error creating pet" });
+        }
+    });
 
     router.put('/pets/:id', async (req: Request, res: Response) => {});
 
