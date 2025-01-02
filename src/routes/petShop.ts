@@ -1,7 +1,5 @@
 import { Request, Response, Router } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from ".";
 
 const configurePetShopRoutes = (router: Router) => {
     router.get('/petshops', async (req: Request, res: Response) => {
