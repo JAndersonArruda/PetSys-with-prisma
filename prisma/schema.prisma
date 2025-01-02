@@ -14,7 +14,7 @@ datasource db {
 }
 
 model PetShops {
-    id   String @id @db.Uuid @default(uuid())
+    id   String @id @default(uuid()) @db.Uuid
     name String @db.VarChar(20)
     cnpj String @unique @db.VarChar(18)
     pets Pets[]
@@ -23,15 +23,15 @@ model PetShops {
 }
 
 model Pets {
-    id                   String    @id @db.Uuid @default(uuid())
-    name                 String    @db.VarChar(15)
-    type                 String    @db.VarChar(15)
-    description          String    @db.Text
+    id                   String   @id @default(uuid()) @db.Uuid
+    name                 String   @db.VarChar(15)
+    type                 String   @db.VarChar(15)
+    description          String   @db.Text
     vaccinated           Boolean
     deadline_vaccination DateTime
-    created_at           DateTime  @default(now())
-    cnpjPetshop          String? @db.VarChar(18)
-    petshop              PetShops? @relation(fields: [cnpjPetshop], references: [cnpj])
+    created_at           DateTime @default(now())
+    cnpjPetshop          String   @db.VarChar(18)
+    petshop              PetShops @relation(fields: [cnpjPetshop], references: [cnpj])
 
     @@map("pets")
 }
