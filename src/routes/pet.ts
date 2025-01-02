@@ -58,6 +58,7 @@ const configurePetRoutes = (router: Router) => {
 
             if (!userAccount) {
                 res.status(404).json({ message: "User not exists" });
+                return;
             }
 
             const pet = await prisma.pets.findFirst({
