@@ -122,14 +122,16 @@ const configurePetRoutes = (router: Router) => {
         const account = req.account!;
 
         try {
-            const pet = await prisma.pets.delete({
+            await prisma.pets.delete({
                 where: {
                     id: id,
                     cnpjPetshop: account
                 }
             });
 
-            res.status(200).json({ message: "Pet deleted successfully", pet: pet });
+            const pets = await prisma.pets.findMany();
+
+            res.status(200).json({ message: "Pet deleted successfully", pets: pets });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: "Error deleting pet" });
