@@ -200,7 +200,57 @@ const configurePetRoutes = (router: Router) => {
         }
     });
 
-    router.patch('/pets/:id/vaccinated', async (req: Request, res: Response) => {});
+    router.patch('/pets/:id/vaccinated', async (req: Request, res: Response) => {
+        const id = req.params.id;
+        const account = req.headers['cnpj'];
+
+        if (!account) {
+            res.status(401).json({ message: "Missing required header: cnpj" });
+            return;
+        }
+
+        const cnpj = Array.isArray(account)? account[0] : account;
+
+        try {
+            const userAccount = await prisma.petShops.findFirst({
+                where: { 
+                    cnpj: cnpj
+                }
+            });
+
+            if (!userAccount) {
+                res.status(404).json({ message: "User not exists" });
+                return;
+            }
+
+            const pet = await prisma.pets.findFirst({
+                where: {
+                    id: id,
+                    cnpjPetshop: cnpj
+                }
+            });
+
+            if (!pet) {
+                res.status(404).json({ message: "Pet not exists" });
+                return;
+            }
+
+            const vaccinatedPet = await prisma.pets.update({
+                where: {
+                    id: id,
+                    cnpjPetshop: cnpj
+                },
+                data: {
+                    vaccinated: true
+                }
+            });
+
+            res.status(200).json({ message: "Pet vaccinated successfully", pet: vaccinatedPet });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error vaccinated pet" });
+        }
+    });
 
     router.delete('/pets/:id', async (req: Request, res: Response) => {});
 }
